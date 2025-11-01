@@ -1,4 +1,4 @@
-name: Build and Auto-Release Drizzy AppStore
+name: Full Auto Build and Release Drizzy AppStore
 on:
   push:
     branches:
@@ -6,14 +6,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write    # allow release creation with GITHUB_TOKEN
+      contents: write   # allows creating releases
     steps:
-      - name: Checkout
+      # 1️⃣ Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Java and Android SDK
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -23,24 +25,46 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      # 3️⃣ Optional: install Gradle if wrapper missing
+      - name: Install Gradle (fallback)
+        uses: gradle/actions/setup-gradle@v4
+
+      # 4️⃣ Build the app
       - name: Build release APK
         run: |
-          chmod +x ./gradlew
-          ./gradlew assembleRelease --stacktrace
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleRelease --stacktrace
+          else
+            gradle assembleRelease --stacktrace
+          fi
 
+      # 5️⃣ Locate APK
       - name: Find APK
         id: apk
         run: |
           APK_PATH=$(find . -type f -name "*release.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ No release APK found."
+            exit 1
+          fi
           echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
           echo "version_tag=v$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
 
-      - name: Create or update release
-        id: release
+      # 6️⃣ Create GitHub Release and upload APK
+      - name: Publish Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.apk.outputs.version_tag }}
           name: "Drizzy AppStore ${{ steps.apk.outputs.version_tag }}"
-          body: "Automatic build of the Drizzy AppStore from main branch."
+          body: |
+            Automated build from the latest commit on main.
+            Commit: ${{ github.sha }}
           artifacts: ${{ steps.apk.outputs.apk_path }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7️⃣ Optional: show where to download
+      - name: Output release link
+        run: |
+          echo "✅ Release created with tag: ${{ steps.apk.outputs.version_tag }}"
+          echo "➡️  Check Releases tab for your APK"
