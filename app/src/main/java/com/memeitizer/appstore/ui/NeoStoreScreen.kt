@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import com.memeitizer.appstore.model.Catalog
 import com.memeitizer.appstore.model.CatalogApp
@@ -63,7 +65,15 @@ fun NeoStore(
                 ) {
                     items(cards, key = { it.app.id }) { m ->
                         GlassCard(glow = MaterialTheme.colorScheme.secondary) {
-                            AsyncImage(m.iconUrl ?: "", null, Modifier.fillMaxWidth().height(120.dp).clip(MaterialTheme.shapes.large))
+                            AsyncImage(
+                                model = m.iconUrl ?: "",
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                                    .clip(MaterialTheme.shapes.large),
+                                contentScale = ContentScale.Crop
+                            )
                             Spacer(Modifier.height(10.dp))
                             Text(m.app.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                             if (!m.app.description.isNullOrBlank()) Text(m.app.description ?: "", style = MaterialTheme.typography.bodySmall)

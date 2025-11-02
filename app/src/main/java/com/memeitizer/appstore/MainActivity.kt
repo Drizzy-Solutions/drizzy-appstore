@@ -93,10 +93,10 @@ fun NeoApp() {
                             val rel = gh.getReleaseByTag("Bearer $t", owner, repo, tag)
                             val asset = rel.assets.firstOrNull { it.name.endsWith(".apk") }
                             if (asset != null) {
+                                val dm = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                                 val req = DownloadManager.Request(Uri.parse(asset.browser_download_url))
                                     .setTitle("${app.name}.apk")
                                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                                val dm = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                                 dm.enqueue(req)
                                 log = "Downloading ${asset.name}…"
                                 break
