@@ -50,14 +50,14 @@ jobs:
             exit 1
           fi
           echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
-          echo "version_tag=v$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+          echo "version_tag=v$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
 
       # 6️⃣ Create GitHub Release and upload APK
       - name: Publish Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.apk.outputs.version_tag }}
-          name: "Drizzy AppStore ${{ steps.apk.outputs.version_tag }}"
+          tag: ${{ env.version_tag }}
+          name: "Drizzy AppStore ${{ env.version_tag }}"
           body: |
             Automated build from the latest commit on main.
             Commit: ${{ github.sha }}
@@ -67,5 +67,5 @@ jobs:
       # 7️⃣ Optional: show where to download
       - name: Output release link
         run: |
-          echo "✅ Release created with tag: ${{ steps.apk.outputs.version_tag }}"
+          echo "✅ Release created with tag: ${{ env.version_tag }}"
           echo "➡️  Check Releases tab for your APK"
