@@ -14,14 +14,26 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        vectorDrawables { useSupportLibrary = true }
     }
 
     buildFeatures { compose = true }
     composeOptions { kotlinCompilerExtensionVersion = "1.5.14" }
 
-    packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    // 🔧 1. Force both Java and Kotlin to JVM 17
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        jvmToolchain(17)
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
+
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.09.02"))
