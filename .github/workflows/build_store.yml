@@ -40,15 +40,16 @@ jobs:
           fi
 
       # 5️⃣ Locate APK
-      - name: Find APK
-        id: apk
+      - name: Find release APK
         run: |
-          APK_PATH=$(find . -type f -name "*release.apk" | head -n 1)
+          APK_PATH=$(find app/build/outputs/apk/release -type f -name "*.apk" | head -n 1)
+          echo "Found $APK_PATH"
+          
           if [ -z "$APK_PATH" ]; then
             echo "❌ No release APK found."
             exit 1
           fi
-          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
           echo "version_tag=v$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
 
       # 6️⃣ Create GitHub Release and upload APK
@@ -60,7 +61,7 @@ jobs:
           body: |
             Automated build from the latest commit on main.
             Commit: ${{ github.sha }}
-          artifacts: ${{ steps.apk.outputs.apk_path }}
+          artifacts: ${{ env.APK_PATH }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # 7️⃣ Optional: show where to download
